@@ -4,9 +4,17 @@
 
 .qa_template:
   extends: .artifacts_reports
+  dependencies:
+    - build
   before_script:
-    - curl -fsSL ${CI_REMOTE_FILES}/RoboFile.php -o RoboFile.php
     - robo ci:prepare
-    # Coder is needed for Drupal coding standards 'Drupal' and 'DrupalPractice'.
+    - if [ ! -z ${COMPOSER_REPO_PACKAGIST_URL} ]; then
+        composer config --global repo.packagist composer ${COMPOSER_REPO_PACKAGIST_URL};
+      fi
+    - if [ ! -z ${COMPOSER_GITHUB_OAUTH_TOKEN} ]; then
+        composer config -g github-oauth.github.com  ${COMPOSER_GITHUB_OAUTH_TOKEN};
+      fi
     # Phpstan needed for Code quality.
-    - composer require --working-dir='/var/www/.composer' --no-ansi -n drupal/coder:^8.3 dealerdirect/phpcodesniffer-composer-installer:^0.6 mglaman/phpstan-drupal
+    - composer require --working-dir='/var/www/.composer' --no-ansi -n
+        phpstan/phpstan:^0.12 mglaman/phpstan-drupal:^0.12
+    - cd /var/www/html
