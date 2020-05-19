@@ -33,10 +33,13 @@
   # CI_TYPE: "module"
 
   # Path to the Drupal web root.
-  # /var/www/html is the Apache docroot of the image used to run the jobs.
   # For a project based on Drupal this is 'web'. Can be 'docroot' on some
   # distributions.
   WEB_ROOT: "/var/www/html/web"
+
+  # Path to the Drupal doc root.
+  # Apache docroot of the image used to run the jobs.
+  DOC_ROOT: "/var/www/html"
 
   # Phpunit tests to run, only custom code or empty for all (included Drupal)
   # see .gitlab-ci/phpunit.xml for settings.
@@ -142,7 +145,11 @@
   #############################################################################
 
   ##############################################################################
-  # Other variables for CI only that do not need editing.
+  # Other variables for CI only that do not need editing in normal usage.
   #
   # Config files location for inclusion if not present locally.
   CI_REMOTE_FILES: "https://gitlab.com/mog33/gitlab-ci-drupal/-/raw/${CI_REF}/.gitlab-ci/"
+  #
+  # docker image version used for CI.
+  # Should be the same as CI_REF, but can be overridden for some use cases.
+  CI_IMAGE_REF: ${CI_REF}

@@ -69,12 +69,6 @@ build:
       when: never
     - when: always
   script:
-    - if [ ! -z ${COMPOSER_REPO_PACKAGIST_URL} ]; then
-        composer config --global repo.packagist composer ${COMPOSER_REPO_PACKAGIST_URL};
-      fi
-    - if [ ! -z ${COMPOSER_GITHUB_OAUTH_TOKEN} ]; then
-        composer config -g github-oauth.github.com  ${COMPOSER_GITHUB_OAUTH_TOKEN};
-      fi
     # Validate the composer.json file.
     - if [ ${CI_TYPE} == "project" ] && [ -f composer.json ]; then
         composer validate --no-check-all --no-check-publish -n --no-ansi;
@@ -84,12 +78,10 @@ build:
         composer install --no-ansi -n --prefer-dist;
       fi
     # Ensure we have Drupal Dev third party for next jobs, mostly PHPUnit.
-    - if [ ! -f "${WEB_ROOT}/../vendor/bin/phpunit" ] && [ ${CI_TYPE} == "project" ] && [ -f composer.json ]; then
-        composer require -d /var/www/html --no-ansi -n "drupal/core-dev:^${CI_DRUPAL_VERSION}";
+    - if [ ! -f "vendor/bin/phpunit" ] && [ ${CI_TYPE} == "project" ] && [ -f composer.json ]; then
+        composer require --no-ansi -n --dev "drupal/core-dev:^${CI_DRUPAL_VERSION}";
       fi
-    - ${WEB_ROOT}/../vendor/bin/phpunit --version
-    # Call any extra build script from ./.gitlab-ci/scripts/build.php
-    - robo ci:build
+    - vendor/bin/phpunit --version
 
 ################################################################################
 # Drupal tests.
@@ -107,7 +99,7 @@ phpunit_unit-kernel:
     # Prepare report folders for coverage.
     - mkdir -p report-${CI_JOB_NAME}/coverage-xml report-${CI_JOB_NAME}/coverage-html
     # Run PHPunit tests for unit, kernel, with coverage report.
-    - ${WEB_ROOT}/../vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}unit,${PHPUNIT_TESTS}kernel"
+    - ${DOC_ROOT}/vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}unit,${PHPUNIT_TESTS}kernel"
         --configuration ${WEB_ROOT}/core
         --coverage-xml ${CI_PROJECT_DIR}/report-${CI_JOB_NAME}/coverage-xml
         --coverage-html ${CI_PROJECT_DIR}/report-${CI_JOB_NAME}/coverage-html
@@ -133,10 +125,10 @@ phpunit_functional:
   rules:
     - if: '$SKIP_TESTS == "1" || $SKIP_TEST_FUNCTIONAL == "1"'
       when: never
-    - when: on_success
+    - when: on_success  # Only for this project to generate documentation.
   script:
     # For functional tests the user need to be the web server user.
-    - sudo -E -u www-data ${WEB_ROOT}/../vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}functional"
+    - sudo -E -u www-data ${DOC_ROOT}/vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}functional"
         --configuration ${WEB_ROOT}/core
         --log-junit report-${CI_JOB_NAME}/junit-functional.xml
         --testdox-html report-${CI_JOB_NAME}/phpunit.html
@@ -157,7 +149,7 @@ phpunit_functionaljs:
     - /scripts/start-chromedriver.sh&
     - sleep 2s
     - curl -s http://localhost:9515/status | jq '.' || true
-    - ${WEB_ROOT}/../vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}functional-javascript"
+    - ${DOC_ROOT}/vendor/bin/phpunit --testsuite "${PHPUNIT_TESTS}functional-javascript"
         --configuration ${WEB_ROOT}/core
         --log-junit report-${CI_JOB_NAME}/junit-functionaljs.xml
         --testdox-html report-${CI_JOB_NAME}/phpunit.html
@@ -257,22 +249,16 @@ behat:
     # Test Chrome is running properly.
     - curl -s http://localhost:9222/json/version | jq '.' || true
     # Install behat and plugins with more memory.
-    - if [ ! -z ${COMPOSER_REPO_PACKAGIST_URL} ]; then
-        composer config --global repo.packagist composer ${COMPOSER_REPO_PACKAGIST_URL};
-      fi
-    - if [ ! -z ${COMPOSER_GITHUB_OAUTH_TOKEN} ]; then
-        composer config -g github-oauth.github.com  ${COMPOSER_GITHUB_OAUTH_TOKEN};
-      fi
     - |
-      if [ ! -f "${WEB_ROOT}/../vendor/bin/behat" ]; then
-        COMPOSER_MEMORY_LIMIT=-1 composer require -d /var/www/html --no-ansi -n --no-suggest \
+      if [ ! -f "${DOC_ROOT}/vendor/bin/behat" ]; then
+        COMPOSER_MEMORY_LIMIT=-1 composer require -d /var/www/html --no-ansi -n --no-suggest --dev \
           "bex/behat-screenshot:^1.2" \
           "dmore/behat-chrome-extension:^1.3" \
           "emuse/behat-html-formatter:0.1.*" \
           "drupal/drupal-extension:~4.0"
       fi
     # Run the behat tests from the 'behat_tests/' folder at the root of the project.
-    - ${WEB_ROOT}/../vendor/bin/behat --config ${CI_PROJECT_DIR}/behat_tests/behat.yml
+    - ${DOC_ROOT}//vendor/bin/behat --config ${CI_PROJECT_DIR}/behat_tests/behat.yml
           --format progress
           --out std
           --format junit
@@ -406,4 +392,4 @@ metrics:
 ################################################################################
 
 default:
-  image: mogtofu33/drupal8ci:${CI_REF}-${CI_DRUPAL_VERSION}
+  image: mogtofu33/drupal8ci:${CI_IMAGE_REF}-${CI_DRUPAL_VERSION}
