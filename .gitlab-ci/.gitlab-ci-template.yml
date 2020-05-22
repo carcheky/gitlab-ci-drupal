@@ -392,6 +392,10 @@ metrics:
     - cp ./report-phpunit_unit-kernel/*.xml /tmp/ || true
     - cp ./report-phpunit_functional/*.xml /tmp/ || true
     - cp ./report-phpunit_functionaljs/*.xml /tmp/ || true
+    - ls -lAh /tmp/ || true
+    - ls -lAh ./report-phpunit_unit-kernel/*.xml || true
+    - ls -lAh ./report-phpunit_functional/*.xml || true
+    - ls -lAh ./report-phpunit_functionaljs/*.xml || true
     - phpqa --tools ${TOOLS_METRICS}
         --config ${CI_PROJECT_DIR}/.gitlab-ci
         --buildDir "report-${CI_JOB_NAME}"
