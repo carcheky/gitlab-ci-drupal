@@ -19,7 +19,8 @@ phpmd:
     standard: .phpmd.xml
 
 pdepend:
-    # Must be copied in the job, see metrics:script.
+    # Must be copied in the job to be usable.
+    # @TODO make it work!
     # coverageReport: /tmp/coverage.xml
 
 phpcpd:
@@ -28,11 +29,13 @@ phpcpd:
 
 phpmetrics:
     # Choose phpunit to use for metrics.
-    # Must be copied in the job, see metrics:script.
+    # Must be copied in the job.
+    # @TODO make it work!
     # junit: /tmp/junit-unit-kernel.xml
     # junit: /tmp/junit-functional.xml
     # junit: /tmp/junit-functionaljs.xml
     # Composer usage for a project can slow a lot Phpmetrics.
+    # @TODO test absolute path.
     # composer: ../../../../var/www/html/
 
 phpstan:

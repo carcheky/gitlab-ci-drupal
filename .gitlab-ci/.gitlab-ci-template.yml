@@ -388,10 +388,6 @@ metrics:
       when: never
     - when: always
   script:
-    # See .gitlab-ci/.phpqa.yml config for phpmetrics to choose a source.
-    - cp ./report-phpunit_unit-kernel/*.xml /tmp/ || true
-    - cp ./report-phpunit_functional/*.xml /tmp/ || true
-    - cp ./report-phpunit_functionaljs/*.xml /tmp/ || true
     - phpqa --tools ${TOOLS_METRICS}
         --config ${CI_PROJECT_DIR}/.gitlab-ci
         --buildDir "report-${CI_JOB_NAME}"
