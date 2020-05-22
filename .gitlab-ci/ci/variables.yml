@@ -64,7 +64,7 @@
   # ':0' is the number of errors allowed, default here is very strict.
   # @TODO: phpcpd failing with "file not found" for a module.
   TOOLS_QA: "phpcs:0,phpstan:0,phpmd:0,parallel-lint:0,phpcpd"
-  TOOLS_METRICS: "phpmetrics,phploc,pdepend"
+  TOOLS_METRICS: "phpmetrics,phploc"
 
   # Composer override to use packagist mirror.
   # COMPOSER_REPO_PACKAGIST_URL: "https?://repo.packagist.org"
